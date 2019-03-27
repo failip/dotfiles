@@ -103,7 +103,7 @@ fi
 bureau_precmd () {
   print
   CURRENT_DIRECTORY=$(pwd)
-  if [[ "$LAST_DIRECTORY" != "$CURRENT_DIRECTORY" ]]; then
+  if [[ "$LAST_DIRECTORY" != "$CURRENT_DIRECTORY" || -n "$SSH_CLIENT" ]]; then
     print -rP "$_1LEFT"
   fi
   LAST_DIRECTORY="$CURRENT_DIRECTORY"
