@@ -1,9 +1,5 @@
 # oh-my-zsh Bureau Theme
 
-### DIRECTORIES
-LAST_DIRECTORY=$(pwd)
-CURRENT_DIRECTORY="$LAST_DIRECTORY"
-
 ### NVM
 ZSH_THEME_NVM_PROMPT_PREFIX="%B⬡%b "
 ZSH_THEME_NVM_PROMPT_SUFFIX=""
@@ -25,56 +21,11 @@ bureau_git_branch () {
   echo "${ref#refs/heads/}"
 }
 
-bureau_git_status() {
-  _STATUS=""
-
-  # check status of files
-  _INDEX=$(command git status --porcelain 2> /dev/null)
-  if [[ -n "$_INDEX" ]]; then
-    if $(echo "$_INDEX" | command grep -q '^[AMRD]. '); then
-      _STATUS="$_STATUS$ZSH_THEME_GIT_PROMPT_STAGED"
-    fi
-    if $(echo "$_INDEX" | command grep -q '^.[MTD] '); then
-      _STATUS="$_STATUS$ZSH_THEME_GIT_PROMPT_UNSTAGED"
-    fi
-    if $(echo "$_INDEX" | command grep -q -E '^\?\? '); then
-      _STATUS="$_STATUS$ZSH_THEME_GIT_PROMPT_UNTRACKED"
-    fi
-    if $(echo "$_INDEX" | command grep -q '^UU '); then
-      _STATUS="$_STATUS$ZSH_THEME_GIT_PROMPT_UNMERGED"
-    fi
-  else
-    _STATUS="$_STATUS$ZSH_THEME_GIT_PROMPT_CLEAN"
-  fi
-
-  # check status of local repository
-  _INDEX=$(command git status --porcelain -b 2> /dev/null)
-  if $(echo "$_INDEX" | command grep -q '^## .*ahead'); then
-    _STATUS="$_STATUS$ZSH_THEME_GIT_PROMPT_AHEAD"
-  fi
-  if $(echo "$_INDEX" | command grep -q '^## .*behind'); then
-    _STATUS="$_STATUS$ZSH_THEME_GIT_PROMPT_BEHIND"
-  fi
-  if $(echo "$_INDEX" | command grep -q '^## .*diverged'); then
-    _STATUS="$_STATUS$ZSH_THEME_GIT_PROMPT_DIVERGED"
-  fi
-
-  if $(command git rev-parse --verify refs/stash &> /dev/null); then
-    _STATUS="$_STATUS$ZSH_THEME_GIT_PROMPT_STASHED"
-  fi
-
-  echo $_STATUS
-}
-
 bureau_git_prompt () {
   local _branch=$(bureau_git_branch)
-  local _status=$(bureau_git_status)
   local _result=" %* "
   if [[ "${_branch}x" != "x" ]]; then
     _result="$ZSH_THEME_GIT_PROMPT_PREFIX$_branch"
-    if [[ "${_status}x" != "x" ]]; then
-      _result="$_result $_status"
-    fi
     _result="$_result$ZSH_THEME_GIT_PROMPT_SUFFIX"
   fi
   echo $_result
@@ -86,13 +37,13 @@ if [[ $EUID -eq 0 ]]; then
   _USERNAME="%{$fg_bold[red]%}%n"
   _LIBERTY="%{$fg[red]%}#"
 else
-  _LIBERTY="%(?.%{$fg[green]%}.%{$fg[red]%})❯$RETVAL"
+  _LIBERTY="%(?.%{$fg[green]%}.%{$fg[red]%})\$$RETVAL"
   _USERNAME="%{$fg_bold[white]%}%n"
   
 fi
   _USERNAME="$_USERNAME%{$reset_color%}@%m"
   _LIBERTY="$_LIBERTY%{$reset_color%}"
-  _PATH="%{$fg_bold[white]%}%~%{$reset_color%}"
+  _PATH="%{$fg_bold[white]%}%c%{$reset_color%}"
 
 if [[ "$USER" != "$DEFAULT_USER" || -n "$SSH_CLIENT" ]]; then
   _1LEFT="$_USERNAME $_PATH"
@@ -100,19 +51,6 @@ else
   _1LEFT="$_PATH"
 fi
 
-bureau_precmd () {
-  print
-  CURRENT_DIRECTORY=$(pwd)
-  if [[ "$LAST_DIRECTORY" != "$CURRENT_DIRECTORY" || -n "$SSH_CLIENT" ]]; then
-    print -rP "$_1LEFT"
-  fi
-  LAST_DIRECTORY="$CURRENT_DIRECTORY"
-}
-
 setopt prompt_subst
-PROMPT=' $_LIBERTY '
+PROMPT='$_1LEFT $_LIBERTY '
 RPROMPT='$(nvm_prompt_info) $(bureau_git_prompt)'
-
-
-autoload -U add-zsh-hook
-add-zsh-hook precmd bureau_precmd
