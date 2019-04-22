@@ -43,7 +43,7 @@ else
 fi
   _USERNAME="$_USERNAME%{$reset_color%}@%m"
   _LIBERTY="$_LIBERTY%{$reset_color%}"
-  _PATH="%{$fg_bold[white]%}%c%{$reset_color%}"
+  _PATH="%{$fg[cyan]%}%c%{$reset_color%}"
 
 if [[ "$USER" != "$DEFAULT_USER" || -n "$SSH_CLIENT" ]]; then
   _1LEFT="$_USERNAME $_PATH"
